@@ -10,6 +10,7 @@ use App\User;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
+use Illuminate\Support\Facades\Session;
 
 class AdminUsersController extends Controller
 {
@@ -124,7 +125,7 @@ class AdminUsersController extends Controller
             $input['photo_id'] = $photo->id;
 
         }
-        $input['password'] = bcrypt($request->password);
+       // $input['password'] = bcrypt($request->password);
 
         $user->update($input);
 
@@ -141,7 +142,16 @@ class AdminUsersController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $user = User::findOrFail($id);
+        unlink(public_path().$user->photo->file);  //no folder name here cause i named it in accessories
+        if($user->delete())
+        {
+            $user->photo->delete();
+            Session::flash('deleted_user','This User Is deleted');
+            return redirect('admin/users');
+
+        }
+
 
     }
 }
